@@ -1,0 +1,47 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile : dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+    volumes:
+      - './src:/app/src'
+    depends_on:
+      - postgres_db
+      - redis
+
+
+  postgres_db:
+    image: postgres
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=emaily_db
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    ports: 
+      - "5540:5540"
+    volumes:
+      - redis-insight-data:/data
+    depends_on:
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:
+  redis-insight-data:
