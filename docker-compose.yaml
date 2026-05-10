@@ -8,12 +8,25 @@ services:
     environment:
       - PORT=3000
       - NODE_ENV=development
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+      - SMTP_USER=
+      - SMTP_PASS=
+    env_file:
+      - .env
     volumes:
       - './src:/app/src'
     depends_on:
       - postgres_db
       - redis
 
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    networks:
+      - default
 
   postgres_db:
     image: postgres

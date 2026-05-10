@@ -38,14 +38,19 @@ import { MailerModule } from '@nestjs-modules/mailer';
         },
       }),
     }),
-    MailerModule.forRoot({
-      transport: {
-        host: 'smtp.ethereal.email',
-        port: 587,
-        auth: {
-          user: 'arely36@ethereal.email',
-          pass: 'PCnUHu5WUPYJAWNwz4',
-        },
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => {
+        const user = config.get<string>('SMTP_USER');
+        const pass = config.get<string>('SMTP_PASS');
+        return {
+          transport: {
+            host: config.get<string>('SMTP_HOST'),
+            port: parseInt(config.get<string>('SMTP_PORT') ?? '1025', 10),
+            secure: false,
+            ...(user && pass ? { auth: { user, pass } } : {}),
+          },
+        };
       },
     }),
     UsersModule,

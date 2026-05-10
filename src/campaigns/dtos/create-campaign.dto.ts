@@ -1,4 +1,11 @@
-import { ArrayNotEmpty, IsArray, IsString } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsEnum,
+  IsOptional,
+  IsString,
+} from 'class-validator';
+import { CampaignPriority } from '../types/campaign-priority.enum';
 
 export class CreateCampaignDto {
   @IsString()
@@ -14,4 +21,8 @@ export class CreateCampaignDto {
 
   @IsString()
   body: string;
+
+  @IsOptional()
+  @IsEnum(CampaignPriority)
+  priority?: CampaignPriority;
 }

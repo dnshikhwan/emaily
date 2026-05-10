@@ -16,6 +16,10 @@ import { EmailsService } from 'src/emails/emails.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { EmailJobData } from './interfaces/email-job-data.interface';
+import {
+  CampaignPriority,
+  PRIORITY_VALUES,
+} from './types/campaign-priority.enum';
 
 @Injectable()
 export class CampaignsService {
@@ -34,7 +38,8 @@ export class CampaignsService {
     user_id: string,
     email: string,
   ) {
-    const { name, subject, body, recepient_list_id } = createCampaignDto;
+    const { name, subject, body, recepient_list_id, priority } =
+      createCampaignDto;
 
     // create campaign entity
     const campaign = this.campaignsRepository.create({
@@ -71,6 +76,8 @@ export class CampaignsService {
     const savedCampaignRecepients =
       await this.campaignRecepientRepository.save(campaignRecepients);
 
+    const priorityValue = PRIORITY_VALUES[priority ?? CampaignPriority.NORMAL];
+
     // send email process to queue
     for (let index = 0; index < campaignRecepients.length; index++) {
       // send job to queue
@@ -84,7 +91,9 @@ export class CampaignsService {
         body,
       };
 
-      await this.sendEmailQueue.add('process-send-email', jobData);
+      await this.sendEmailQueue.add('process-send-email', jobData, {
+        priority: priorityValue,
+      });
     }
 
     return {
@@ -113,6 +122,13 @@ export class CampaignsService {
       {
         status: Status.SENT,
       },
+    );
+  }
+
+  async markCampaignRecepientFailed(id: string) {
+    await this.campaignRecepientRepository.update(
+      { id },
+      { status: Status.FAILED },
     );
   }
 }

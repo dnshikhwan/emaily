@@ -14,6 +14,15 @@ import { SendEmailProcessor } from './workers/send-email.worker';
     TypeOrmModule.forFeature([Campaign, CampaignRecepient]),
     BullModule.registerQueue({
       name: 'send-email-campaign',
+      defaultJobOptions: {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 2000,
+        },
+        removeOnComplete: { count: 100 },
+        removeOnFail: { count: 1000 },
+      },
     }),
     RecepientsModule,
     EmailsModule,

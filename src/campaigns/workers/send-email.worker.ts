@@ -29,4 +29,20 @@ export class SendEmailProcessor extends WorkerHost {
     );
     console.log(`Job with ${job.id} completed`);
   }
+
+  @OnWorkerEvent('failed')
+  async onFailed(job: Job, err: Error) {
+    const attemptsMade = job.attemptsMade;
+    const maxAttempts = job.opts.attempts ?? 1;
+
+    console.log(
+      `Job ${job.id} failed attempt ${attemptsMade}/${maxAttempts}: ${err.message}`,
+    );
+
+    if (attemptsMade >= maxAttempts) {
+      await this.campaignsService.markCampaignRecepientFailed(
+        job.data.campaignRecepientId,
+      );
+    }
+  }
 }

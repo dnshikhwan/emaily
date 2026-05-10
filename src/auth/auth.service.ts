@@ -65,7 +65,7 @@ export class AuthService {
     res.cookie('token', token, {
       httpOnly: true,
       sameSite: 'strict',
-      maxAge: 15 * 60 * 100, // 15 minutes
+      maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     // return
